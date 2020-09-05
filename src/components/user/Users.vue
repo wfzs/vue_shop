@@ -33,7 +33,7 @@
             <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id)"></el-button>
             <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeUserById(scope.row.id)"></el-button>
             <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+              <el-button type="warning" icon="el-icon-setting" size="mini" @click="setRole(scope.row)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -83,6 +83,22 @@
         <el-button type="primary" @click="editUserInfo">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 分配角色对话框 -->
+    <el-dialog title="分配角色" :visible.sync="setDialogVisible" width="50%" @close="setDialogClosed">
+      <div>
+        <p>当前的用户：{{userInfo.username}}</p>
+        <p>当前的角色：{{userInfo.role_name}}</p>
+        <p>分配新角色：
+          <el-select v-model="selectId" placeholder="请选择">
+            <el-option v-for="item in rolesList" :key="item.id" :label="item.roleName" :value="item.id"></el-option>
+          </el-select></p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="setRoleInfo">确 定</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -152,7 +168,11 @@ export default {
           { required: true, message: '请输入手机号', trigger: 'blur' },
           { validator: validateMobile, trigger: 'blur' }
         ]
-      }
+      },
+      setDialogVisible: false,
+      userInfo: {},
+      rolesList: [],
+      selectId: ''
     }
   },
   created() {
@@ -160,9 +180,7 @@ export default {
   },
   methods: {
     async getUserList() {
-      const { data: res } = await this.$https.get('users', {
-        params: this.queryInfo
-      })
+      const { data: res } = await this.$https.get('users', { params: this.queryInfo })
       if (res.meta.status !== 200) {
         return this.$message.error('获取用户列表失败!')
       }
@@ -246,6 +264,25 @@ export default {
       }).catch(() => {
         this.$message.info('已取消删除')
       })
+    },
+    async setRole(userInfo) {
+      this.userInfo = userInfo
+      const { data: res } = await this.$https.get('roles')
+      if(res.meta.status !== 200) return this.$message.error('获取角色列表失败！')
+      this.rolesList = res.data
+      this.setDialogVisible = true
+    },
+    async setRoleInfo() {
+      if(!this.selectId) return this.$message.error('请选择要分配的角色！')
+      const { data: res } = await this.$https.put(`users/${this.userInfo.id}/role`, { rid: this.selectId })
+      if(res.meta.status !== 200) return this.$message.error('更新角色失败！')
+      this.$message.success('更新角色成功！')
+      this.getUserList()
+      this.setDialogVisible = false
+    },
+    setDialogClosed() {
+      this.selectId = ''
+      this.userInfo = {}
     }
   }
 }
