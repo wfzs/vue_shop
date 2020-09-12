@@ -66,7 +66,7 @@
       </span>
     </el-dialog>
 
-    <!-- 添加角色对话框 -->
+    <!-- 编辑角色对话框 -->
     <el-dialog title="编辑角色" :visible.sync="editDialogVisible" width="50%" @close="DialogClosed">
       <el-form :model="editForm" :rules="FormRules" ref="FormRef" label-width="80px" class="demo-ruleForm">
         <el-form-item label="角色名称" prop="roleName">

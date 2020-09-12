@@ -18,10 +18,10 @@ module.exports = {
     'no-console': 'off',
     'no-debugger': 'off',
     'space-before-function-paren': 0,
-    'keyword-spacing': 0,
+    'keyword-spacing': 0
   },
 
-  'extends': [
+  extends: [
     'plugin:vue/essential',
     '@vue/standard'
   ]
